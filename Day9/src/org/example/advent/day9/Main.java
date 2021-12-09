@@ -3,12 +3,11 @@ package org.example.advent.day9;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Main {
-
-    private static Set<Integer> UNIQUE_SIZES = new HashSet<>(Arrays.asList(2, 3, 4, 7));
 
     public static void main(String[] args) throws IOException {
         List<String> lines = readInput();

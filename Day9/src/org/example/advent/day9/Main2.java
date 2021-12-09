@@ -5,16 +5,16 @@ import javafx.util.Pair;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Main2 {
 
-    private static Set<Integer> UNIQUE_SIZES = new HashSet<>(Arrays.asList(2, 3, 4, 7));
-
     public static void main(String[] args) throws IOException {
         List<String> lines = readInput();
-        long result = 0;
 
         int maxCol = lines.get(0).length();
         int maxRow = lines.size();
@@ -84,28 +84,10 @@ public class Main2 {
     }
 
     private static boolean isLowPoint(int i, int j, int[][] heightmap) {
-        int up = i - 1;
-        int down = i + 1;
-        int left = j - 1;
-        int right = j + 1;
-
-        List<Integer> neighbors = new ArrayList<>();
-        if (up >= 0) {
-            neighbors.add(heightmap[up][j]);
-        }
-        if (down < heightmap.length) {
-            neighbors.add(heightmap[down][j]);
-        }
-        if (left >= 0) {
-            neighbors.add(heightmap[i][left]);
-        }
-        if (right < heightmap[i].length) {
-            neighbors.add((heightmap[i][right]));
-        }
+        List<Pair<Integer, Integer>> neighbors = getNeighbors(i, j, heightmap);
         return neighbors.stream()
-                .allMatch(n -> heightmap[i][j] < n);
+                .allMatch(n -> heightmap[i][j] < heightmap[n.getKey()][n.getValue()]);
     }
-
 
     private static List<String> readInput() throws IOException {
         List<String> lines = new ArrayList<>();
