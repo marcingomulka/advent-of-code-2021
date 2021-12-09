@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,14 +34,14 @@ public class Main2 {
                 }
             }
         }
-        List<Long> basins = new ArrayList<>();
-        for (Pair<Integer, Integer> lowPoint : lowPoints) {
-            long basinSize = flood(lowPoint, heightmap);
-            basins.add(basinSize);
-        }
-        Collections.sort(basins, Comparator.reverseOrder());
-        //System.out.println(basins);
-        System.out.println(basins.get(0) * basins.get(1) * basins.get(2));
+        Long result = lowPoints.stream()
+                .map(point -> flood(point, heightmap))
+                .filter(basinSize -> basinSize > 0)
+                .sorted(Comparator.reverseOrder())
+                .limit(3)
+                .reduce((s1, s2) -> s1 * s2)
+                .orElse(0L);
+        System.out.println(result);
     }
 
     private static long flood(Pair<Integer, Integer> lowPoint, int[][] heightmap) {
