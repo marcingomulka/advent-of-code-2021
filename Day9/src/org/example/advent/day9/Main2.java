@@ -46,6 +46,9 @@ public class Main2 {
     }
 
     private static long flood(Pair<Integer, Integer> lowPoint, int[][] heightmap) {
+        if (heightmap[lowPoint.getKey()][lowPoint.getValue()] == 9) {
+            return 0;
+        }
         int size = 1;
         heightmap[lowPoint.getKey()][lowPoint.getValue()] = 9;
 
