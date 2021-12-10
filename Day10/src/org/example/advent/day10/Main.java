@@ -3,25 +3,26 @@ package org.example.advent.day10;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Main {
 
-    static Map<Character, Character> chunkPairs = new HashMap<>();
-    static Map<Character, Long> chunkPoints = new HashMap<>();
-
-    static {
-        chunkPairs.put('(', ')');
-        chunkPairs.put('[', ']');
-        chunkPairs.put('{', '}');
-        chunkPairs.put('<', '>');
-
-        chunkPoints.put(')', 3L);
-        chunkPoints.put(']', 57L);
-        chunkPoints.put('}', 1197L);
-        chunkPoints.put('>', 25137L);
-    }
+    static Map<Character, Character> chunkPairs = Map.of(
+            '(', ')',
+            '[', ']',
+            '{', '}',
+            '<', '>'
+    );
+    static Map<Character, Long> chunkPoints = Map.of(
+            ')', 3L,
+            ']', 57L,
+            '}', 1197L,
+            '>', 25137L
+    );
 
     public static void main(String[] args) throws IOException {
         List<String> lines = readInput();

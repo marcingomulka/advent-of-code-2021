@@ -1,7 +1,5 @@
 package org.example.advent.day9;
 
-import javafx.util.Pair;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -94,5 +92,24 @@ public class Main2 {
             lines = reader.lines().collect(Collectors.toList());
         }
         return lines;
+    }
+
+}
+
+class Pair<X, Y> {
+    X first;
+    Y second;
+
+    public Pair(X first, Y second) {
+        this.first = first;
+        this.second = second;
+    }
+
+    public X getKey() {
+        return first;
+    }
+
+    public Y getValue() {
+        return second;
     }
 }

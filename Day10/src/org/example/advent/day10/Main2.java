@@ -8,20 +8,18 @@ import java.util.stream.Collectors;
 
 public class Main2 {
 
-    static Map<Character, Character> chunkPairs = new HashMap<>();
-    static Map<Character, Long> chunkPoints = new HashMap<>();
-
-    static {
-        chunkPairs.put('(', ')');
-        chunkPairs.put('[', ']');
-        chunkPairs.put('{', '}');
-        chunkPairs.put('<', '>');
-
-        chunkPoints.put(')', 1L);
-        chunkPoints.put(']', 2L);
-        chunkPoints.put('}', 3L);
-        chunkPoints.put('>', 4L);
-    }
+    static Map<Character, Character> chunkPairs = Map.of(
+            '(', ')',
+            '[', ']',
+            '{', '}',
+            '<', '>'
+    );
+    static Map<Character, Long> chunkPoints = Map.of(
+            ')', 1L,
+            ']', 2L,
+            '}', 3L,
+            '>', 4L
+    );
 
     public static void main(String[] args) throws IOException {
         List<String> lines = readInput();
