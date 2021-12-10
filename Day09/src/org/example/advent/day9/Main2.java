@@ -43,15 +43,15 @@ public class Main2 {
     }
 
     private static long flood(Pair<Integer, Integer> lowPoint, int[][] heightmap) {
-        if (heightmap[lowPoint.getKey()][lowPoint.getValue()] == 9) {
+        if (heightmap[lowPoint.getFirst()][lowPoint.getSecond()] == 9) {
             return 0;
         }
         int size = 1;
-        heightmap[lowPoint.getKey()][lowPoint.getValue()] = 9;
+        heightmap[lowPoint.getFirst()][lowPoint.getSecond()] = 9;
 
-        List<Pair<Integer, Integer>> neighbors = getNeighbors(lowPoint.getKey(), lowPoint.getValue(), heightmap);
+        List<Pair<Integer, Integer>> neighbors = getNeighbors(lowPoint.getFirst(), lowPoint.getSecond(), heightmap);
         for (Pair<Integer, Integer> neighbor : neighbors) {
-            if (heightmap[neighbor.getKey()][neighbor.getValue()] < 9) {
+            if (heightmap[neighbor.getFirst()][neighbor.getSecond()] < 9) {
                 size += flood(neighbor, heightmap);
             }
         }
@@ -83,7 +83,7 @@ public class Main2 {
     private static boolean isLowPoint(int i, int j, int[][] heightmap) {
         List<Pair<Integer, Integer>> neighbors = getNeighbors(i, j, heightmap);
         return neighbors.stream()
-                .allMatch(n -> heightmap[i][j] < heightmap[n.getKey()][n.getValue()]);
+                .allMatch(n -> heightmap[i][j] < heightmap[n.getFirst()][n.getSecond()]);
     }
 
     private static List<String> readInput() throws IOException {
@@ -105,11 +105,11 @@ class Pair<X, Y> {
         this.second = second;
     }
 
-    public X getKey() {
+    public X getFirst() {
         return first;
     }
 
-    public Y getValue() {
+    public Y getSecond() {
         return second;
     }
 }
