@@ -25,9 +25,7 @@ public class Main2 {
             node2.addAjacent(node1);
         }
         List<Collection<Node>> paths = new ArrayList<>();
-
         Deque<Node> path = new LinkedList<>();
-
         Node start = nodes.get("start");
         searchPaths(start, path, paths);
 
@@ -40,7 +38,6 @@ public class Main2 {
             visited.getAdjacent().stream()
                     .filter(n -> applySelectionFilter(n, path))
                     .forEach(n -> searchPaths(n, path, paths));
-
         } else {
             paths.add(new ArrayList<>(path));
         }
@@ -54,18 +51,15 @@ public class Main2 {
 
         long doubleVisitCount = visitedSmalls.values().stream().filter(val -> val == 2L).count();
         long nodeVisitCount = visitedSmalls.getOrDefault(n.getLabel(), 0L);
-
-        boolean smallNodeNoVisited = nodeVisitCount == 0L;
-        boolean smallNodeVisitedOnce = nodeVisitCount == 1L;
-        boolean noDoubleVisit = doubleVisitCount == 0L;
         boolean doubleVisitExists = doubleVisitCount == 1L;
-
         return !n.getLabel().equals("start")
-                && (!n.isSmall() || testSmallOccurences(smallNodeVisitedOnce, smallNodeNoVisited, noDoubleVisit, doubleVisitExists));
+                && (!n.isSmall()
+                || n.getLabel().equals("end")
+                || testSmallOccurences(nodeVisitCount, doubleVisitExists));
     }
 
-    private static boolean testSmallOccurences(boolean smallNodeVisitedOnce, boolean smallNodeNoVisited, boolean noDoubleVisit, boolean doubleVisitExists) {
-        return (smallNodeVisitedOnce && !doubleVisitExists) || noDoubleVisit || smallNodeNoVisited;
+    private static boolean testSmallOccurences(long nodeVisitCount, boolean doubleVisitExists) {
+        return (nodeVisitCount == 1L && !doubleVisitExists) || nodeVisitCount == 0L;
     }
 
 

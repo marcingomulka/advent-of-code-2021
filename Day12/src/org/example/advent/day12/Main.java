@@ -25,9 +25,7 @@ public class Main {
             node2.addAjacent(node1);
         }
         List<Collection<Node>> paths = new ArrayList<>();
-
         Deque<Node> path = new LinkedList<>();
-
         Node start = nodes.get("start");
         searchPaths(start, path, paths);
 
@@ -40,7 +38,6 @@ public class Main {
             visited.getAdjacent().stream()
                     .filter(n -> !n.isSmall() || !path.contains(n))
                     .forEach(n -> searchPaths(n, path, paths));
-
         } else {
             paths.add(new ArrayList<>(path));
         }
@@ -82,7 +79,7 @@ class Node {
 
     public boolean isSmall() {
         return this.label.chars()
-                .allMatch(character -> character - '0' > 48) && !label.equals("end");
+                .allMatch(character -> character - '0' > 48);
     }
 
     @Override
