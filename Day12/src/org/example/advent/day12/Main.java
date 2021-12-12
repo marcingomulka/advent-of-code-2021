@@ -24,12 +24,15 @@ public class Main {
             node1.addAjacent(node2);
             node2.addAjacent(node1);
         }
-        List<Collection<Node>> paths = new ArrayList<>();
-        Deque<Node> path = new LinkedList<>();
         Node start = nodes.get("start");
-        searchPaths(start, path, paths);
 
-        System.out.println(paths.size());
+        List<Collection<Node>> paths = new ArrayList<>();
+        searchPaths(start, new LinkedList<>(), paths);
+        System.out.println("Part1: " + paths.size());
+
+        paths = new ArrayList<>();
+        searchPaths2(start, new LinkedList<>(), paths);
+        System.out.println("Part2: " + paths.size());
     }
 
     public static void searchPaths(Node visited, Deque<Node> path, List<Collection<Node>> paths) {
@@ -42,6 +45,35 @@ public class Main {
             paths.add(new ArrayList<>(path));
         }
         path.pop();
+    }
+
+    public static void searchPaths2(Node visited, Deque<Node> path, List<Collection<Node>> paths) {
+        path.push(visited);
+        if (!visited.getLabel().equals("end")) {
+            visited.getAdjacent().stream()
+                    .filter(n -> applySelectionFilter(n, path))
+                    .forEach(n -> searchPaths2(n, path, paths));
+        } else {
+            paths.add(new ArrayList<>(path));
+        }
+        path.pop();
+    }
+
+    private static boolean applySelectionFilter(Node n, Deque<Node> path) {
+        Map<String, Long> visitedSmalls = path.stream()
+                .filter(Node::isSmall)
+                .collect(Collectors.groupingBy(Node::getLabel, HashMap::new, Collectors.counting()));
+
+        long nodeVisitCount = visitedSmalls.getOrDefault(n.getLabel(), 0L);
+        boolean doubleVisitExists = visitedSmalls.values().stream().anyMatch(val -> val == 2L);
+        return !n.getLabel().equals("start")
+                && (!n.isSmall()
+                || n.getLabel().equals("end")
+                || testSmallOccurences(nodeVisitCount, doubleVisitExists));
+    }
+
+    private static boolean testSmallOccurences(long nodeVisitCount, boolean doubleVisitExists) {
+        return (nodeVisitCount == 1L && !doubleVisitExists) || nodeVisitCount == 0L;
     }
 
 
