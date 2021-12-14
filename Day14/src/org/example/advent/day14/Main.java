@@ -13,8 +13,6 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         List<String> lines = readInput();
-
-        Map<String, String> rules = new HashMap<>();
         String template = lines.get(0).trim();
 
         Map<String, Long> chunkOccurrences = new HashMap<>();
@@ -27,6 +25,7 @@ public class Main {
                 .boxed()
                 .collect(Collectors.groupingBy(Character::toString, Collectors.counting()));
 
+        Map<String, String> rules = new HashMap<>();
         for (String line : lines) {
             if (line.contains("->")) {
                 String[] chunks = line.split("->");
@@ -43,13 +42,13 @@ public class Main {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             for (String chunk : previous.keySet()) {
-                String toReplace = rules.get(chunk);
-                if (toReplace != null) {
-                    String newChunk = chunk.substring(0, 1) + toReplace;
-                    String newChunk2 = toReplace + chunk.substring(1, 2);
+                String toInsert = rules.get(chunk);
+                if (toInsert != null) {
+                    String newChunk = chunk.substring(0, 1) + toInsert;
+                    String newChunk2 = toInsert + chunk.substring(1, 2);
 
                     long multiplyFactor = previous.get(chunk);
-                    letterOccurrences.compute(toReplace, (k, v) -> v != null ? v + multiplyFactor : multiplyFactor);
+                    letterOccurrences.compute(toInsert, (k, v) -> v != null ? v + multiplyFactor : multiplyFactor);
                     chunkOccurrences.compute(newChunk, (k, v) -> v != null ? v + multiplyFactor : multiplyFactor);
                     chunkOccurrences.compute(newChunk2, (k, v) -> v != null ? v + multiplyFactor : multiplyFactor);
                     chunkOccurrences.compute(chunk, (k, v) -> v != null ? v - multiplyFactor : multiplyFactor);
