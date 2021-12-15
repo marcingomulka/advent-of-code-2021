@@ -3,6 +3,8 @@ package org.example.advent.day15;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -31,14 +33,25 @@ public class Main {
 
         Pair<Integer, Integer> start = new Pair<>(0, 0);
 
-        //long[][] distances = dijkstraShortestDistances(map, start);
-        //System.out.println("Part1: " + distances[map.length - 1][map[0].length - 1]);
-        System.out.println("Part1: " + aStarShortestDistance(map, start, new Pair<>(map.length - 1, map[0].length - 1)));
+        Instant begin = Instant.now();
+        dijkstraShortestDistances(map, start, new Pair<>(map.length - 1, map[0].length - 1));
+        System.out.println("Dijkstra time: " + Duration.between(begin, Instant.now()).toMillis() + " ms");
 
-        //long[][] distances2 = dijkstraShortestDistances(fullMap, start);
-        //System.out.println("Part2: " + distances2[fullMap.length - 1][fullMap[0].length - 1]);
-        System.out.println("Part2: " + aStarShortestDistance(fullMap, start, new Pair<>(fullMap.length - 1, fullMap[0].length - 1)));
+        begin = Instant.now();
+        long result1 = aStarShortestDistance(map, start, new Pair<>(map.length - 1, map[0].length - 1));
+        System.out.println("A* time: " + Duration.between(begin, Instant.now()).toMillis() + " ms");
 
+        System.out.println("Part1: " + result1);
+
+        begin = Instant.now();
+        dijkstraShortestDistances(fullMap, start, new Pair<>(fullMap.length - 1, fullMap[0].length - 1));
+        System.out.println("Dijkstra time: " + Duration.between(begin, Instant.now()).toMillis() + " ms");
+
+        begin = Instant.now();
+        long result2 = aStarShortestDistance(fullMap, start, new Pair<>(fullMap.length - 1, fullMap[0].length - 1));
+        System.out.println("A* time: " + Duration.between(begin, Instant.now()).toMillis() + " ms");
+
+        System.out.println("Part2: " + result2);
     }
 
     private static void copyArrayWithIncrement(int tileX, int tileY, int[][] fullMap, int[][] map, int sizeX, int sizeY) {
@@ -55,7 +68,7 @@ public class Main {
         }
     }
 
-    private static long[][] dijkstraShortestDistances(int[][] map, Pair<Integer, Integer> start) {
+    private static long[][] dijkstraShortestDistances(int[][] map, Pair<Integer, Integer> start, Pair<Integer, Integer> end) {
         int maxRows = map.length;
         int maxCols = map[0].length;
         long[][] distances = new long[maxRows][maxCols];
@@ -80,6 +93,9 @@ public class Main {
             Pair<Integer, Integer> node = queue.poll();
             if (settled.contains(node)) {
                 continue;
+            }
+            if (node.equals(end)) {
+                return distances;
             }
             settled.add(node);
             List<Pair<Integer, Integer>> neighbours = getNeighbors(node.first, node.second, map);
