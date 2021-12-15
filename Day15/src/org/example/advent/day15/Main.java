@@ -25,26 +25,26 @@ public class Main {
         int[][] fullMap = new int[maxRows * 5][maxCols * 5];
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
-                copyArrayWithIncrement(i, j, fullMap, map, maxRows);
+                copyArrayWithIncrement(i, j, fullMap, map, maxRows, maxCols);
             }
         }
 
         Pair<Integer, Integer> start = new Pair<>(0, 0);
 
-        long[][] distances = shortestDistances(maxCols, maxRows, map, start);
-        System.out.println("Part1: " + distances[maxRows - 1][maxCols - 1]);
+        long[][] distances = shortestDistances(map, start);
+        System.out.println("Part1: " + distances[map.length - 1][map[0].length - 1]);
 
-        long[][] distances2 = shortestDistances(maxCols * 5, maxRows * 5, fullMap, start);
-        System.out.println("Part2: " + distances2[maxRows * 5 - 1][maxCols * 5 - 1]);
+        long[][] distances2 = shortestDistances(fullMap, start);
+        System.out.println("Part2: " + distances2[fullMap.length - 1][fullMap[0].length - 1]);
 
     }
 
-    private static void copyArrayWithIncrement(int tileX, int tileY, int[][] fullMap, int[][] map, int size) {
-        int beginRow = tileX * size;
-        int beginCol = tileY * size;
+    private static void copyArrayWithIncrement(int tileX, int tileY, int[][] fullMap, int[][] map, int sizeX, int sizeY) {
+        int beginRow = tileX * sizeX;
+        int beginCol = tileY * sizeY;
         int increment = tileX + tileY;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int i = 0; i < sizeX; i++) {
+            for (int j = 0; j < sizeY; j++) {
                 fullMap[beginRow + i][beginCol + j] = map[i][j] + increment;
                 if (fullMap[beginRow + i][beginCol + j] > 9) {
                     fullMap[beginRow + i][beginCol + j] %= 9;
@@ -53,13 +53,17 @@ public class Main {
         }
     }
 
-    private static long[][] shortestDistances(int maxCols, int maxRows, int[][] map, Pair<Integer, Integer> start) {
+    private static long[][] shortestDistances(int[][] map, Pair<Integer, Integer> start) {
+        int maxRows = map.length;
+        int maxCols = map[0].length;
         long[][] distances = new long[maxRows][maxCols];
         for (int i = 0; i < maxRows; i++) {
             for (int j = 0; j < maxCols; j++) {
                 distances[i][j] = Long.MAX_VALUE;
             }
         }
+        distances[start.first][start.second] = 0L;
+
         PriorityQueue<Pair<Integer, Integer>> queue = new PriorityQueue<>(
                 (o1, o2) -> {
                     long d1 = distances[o1.first][o1.second];
@@ -67,8 +71,8 @@ public class Main {
                     return Long.compare(d1, d2);
                 }
         );
-        distances[start.first][start.second] = 0L;
         queue.add(start);
+
         Set<Pair<Integer, Integer>> settled = new HashSet<>();
         while (!queue.isEmpty()) {
             Pair<Integer, Integer> node = queue.poll();
