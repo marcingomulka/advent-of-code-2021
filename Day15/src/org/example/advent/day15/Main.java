@@ -31,11 +31,13 @@ public class Main {
 
         Pair<Integer, Integer> start = new Pair<>(0, 0);
 
-        long[][] distances = shortestDistances(map, start);
-        System.out.println("Part1: " + distances[map.length - 1][map[0].length - 1]);
+        //long[][] distances = dijkstraShortestDistances(map, start);
+        //System.out.println("Part1: " + distances[map.length - 1][map[0].length - 1]);
+        System.out.println("Part1: " + aStarShortestDistance(map, start, new Pair<>(map.length - 1, map[0].length - 1)));
 
-        long[][] distances2 = shortestDistances(fullMap, start);
-        System.out.println("Part2: " + distances2[fullMap.length - 1][fullMap[0].length - 1]);
+        //long[][] distances2 = dijkstraShortestDistances(fullMap, start);
+        //System.out.println("Part2: " + distances2[fullMap.length - 1][fullMap[0].length - 1]);
+        System.out.println("Part2: " + aStarShortestDistance(fullMap, start, new Pair<>(fullMap.length - 1, fullMap[0].length - 1)));
 
     }
 
@@ -53,7 +55,7 @@ public class Main {
         }
     }
 
-    private static long[][] shortestDistances(int[][] map, Pair<Integer, Integer> start) {
+    private static long[][] dijkstraShortestDistances(int[][] map, Pair<Integer, Integer> start) {
         int maxRows = map.length;
         int maxCols = map[0].length;
         long[][] distances = new long[maxRows][maxCols];
@@ -92,6 +94,62 @@ public class Main {
                     });
         }
         return distances;
+    }
+
+    private static long aStarShortestDistance(int[][] map, Pair<Integer, Integer> start, Pair<Integer, Integer> end) {
+        int maxRows = map.length;
+        int maxCols = map[0].length;
+        long[][] distances = new long[maxRows][maxCols];
+        for (int i = 0; i < maxRows; i++) {
+            for (int j = 0; j < maxCols; j++) {
+                distances[i][j] = Long.MAX_VALUE;
+            }
+        }
+        distances[start.first][start.second] = 0L;
+        long[][] estimates = new long[maxRows][maxCols];
+        for (int i = 0; i < maxRows; i++) {
+            for (int j = 0; j < maxCols; j++) {
+                estimates[i][j] = Long.MAX_VALUE;
+            }
+        }
+        estimates[start.first][start.second] = 0L;
+
+        PriorityQueue<Pair<Integer, Integer>> queue = new PriorityQueue<>(
+                (o1, o2) -> {
+                    long d1 = estimates[o1.first][o1.second];
+                    long d2 = estimates[o2.first][o2.second];
+                    return Long.compare(d1, d2);
+                }
+        );
+        queue.add(start);
+
+        Set<Pair<Integer, Integer>> settled = new HashSet<>();
+        while (!queue.isEmpty()) {
+            Pair<Integer, Integer> node = queue.poll();
+            if (settled.contains(node)) {
+                continue;
+            }
+            settled.add(node);
+            if (node.equals(end)) {
+                return distances[node.first][node.second];
+            }
+            List<Pair<Integer, Integer>> neighbours = getNeighbors(node.first, node.second, map);
+            neighbours.stream()
+                    .filter(neighbor -> !settled.contains(neighbor))
+                    .forEach(neighbor -> {
+                        long dist = distances[node.first][node.second] + map[neighbor.first][neighbor.second];
+                        if (dist < distances[neighbor.first][neighbor.second]) {
+                            distances[neighbor.first][neighbor.second] = dist;
+                            estimates[neighbor.first][neighbor.second] = dist + taxiDist(neighbor, end);
+                        }
+                        queue.add(neighbor);
+                    });
+        }
+        return 0L;
+    }
+
+    private static long taxiDist(Pair<Integer, Integer> neighbor, Pair<Integer, Integer> end) {
+        return Math.abs(end.first - neighbor.first) + Math.abs(end.second - neighbor.second);
     }
 
     private static List<Pair<Integer, Integer>> getNeighbors(int x, int y, int[][] map) {
