@@ -116,18 +116,14 @@ public class Main {
         int maxRows = map.length;
         int maxCols = map[0].length;
         long[][] distances = new long[maxRows][maxCols];
-        for (int i = 0; i < maxRows; i++) {
-            for (int j = 0; j < maxCols; j++) {
-                distances[i][j] = Long.MAX_VALUE;
-            }
-        }
-        distances[start.first][start.second] = 0L;
         long[][] estimates = new long[maxRows][maxCols];
         for (int i = 0; i < maxRows; i++) {
             for (int j = 0; j < maxCols; j++) {
+                distances[i][j] = Long.MAX_VALUE;
                 estimates[i][j] = Long.MAX_VALUE;
             }
         }
+        distances[start.first][start.second] = 0L;
         estimates[start.first][start.second] = 0L;
 
         PriorityQueue<Pair<Integer, Integer>> queue = new PriorityQueue<>(
