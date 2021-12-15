@@ -67,7 +67,7 @@ public class Main {
                     return Long.compare(d1, d2);
                 }
         );
-        distances[0][0] = 0L;
+        distances[start.first][start.second] = 0L;
         queue.add(start);
         Set<Pair<Integer, Integer>> settled = new HashSet<>();
         while (!queue.isEmpty()) {

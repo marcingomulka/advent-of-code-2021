@@ -51,7 +51,7 @@ public class Main {
                     letterOccurrences.compute(toInsert, (k, v) -> v != null ? v + multiplyFactor : multiplyFactor);
                     chunkOccurrences.compute(newChunk, (k, v) -> v != null ? v + multiplyFactor : multiplyFactor);
                     chunkOccurrences.compute(newChunk2, (k, v) -> v != null ? v + multiplyFactor : multiplyFactor);
-                    chunkOccurrences.compute(chunk, (k, v) -> v != null ? v - multiplyFactor : multiplyFactor);
+                    chunkOccurrences.compute(chunk, (k, v) -> v != null ? v - multiplyFactor : 0L);
                 }
             }
             if (cycle == 9) {
