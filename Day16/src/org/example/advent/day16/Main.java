@@ -66,10 +66,9 @@ public class Main {
 
     private static long readOperator(ListIterator<Character> pointer, int type) {
         List<Long> subNumbers;
-        int legthType = Integer.valueOf(Character.toString(pointer.next()), 2);
-        if (legthType == 0) {
+        char lengthType = pointer.next();
+        if (lengthType == '0') {
             subNumbers = readLengthTypeSubPackets(pointer);
-
         } else {
             subNumbers = readCountTypeSubPackets(pointer);
         }
