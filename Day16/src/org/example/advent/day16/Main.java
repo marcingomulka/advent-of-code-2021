@@ -33,7 +33,9 @@ public class Main {
     }
 
     private static int readHeaderParam(ListIterator<Character> pointer) {
-        String versionStr = pointer.next() + Character.toString(pointer.next()) + pointer.next();
+        String versionStr = IntStream.range(0, 3)
+                .mapToObj(i -> Character.toString(pointer.next()))
+                .collect(Collectors.joining());
         return Integer.valueOf(versionStr, 2);
     }
 
