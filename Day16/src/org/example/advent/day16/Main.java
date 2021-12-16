@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
 
@@ -21,11 +22,9 @@ public class Main {
         for (int i = 0; i < hexCode.length(); i++) {
             String hex = Character.toString(hexCode.charAt(i));
             String binary = Integer.toBinaryString(Integer.valueOf(hex, 16));
-            binary = String.format("%4s", binary).replace(' ', '0');
+            String binaryPad = String.format("%4s", binary).replace(' ', '0');
 
-            for (int j = 0; j < binary.length(); j++) {
-                binaries.add(binary.charAt(j));
-            }
+            binaryPad.chars().forEach(c -> binaries.add((char) c));
         }
         long result = readPacket(binaries.listIterator());
 
@@ -51,17 +50,15 @@ public class Main {
 
     private static long readLiteralPacket(ListIterator<Character> pointer) {
         boolean endGroupReached = false;
-        StringBuilder groupBits = new StringBuilder();
+        StringBuilder numberBits = new StringBuilder();
         while (!endGroupReached) {
             char groupId = pointer.next();
-            for (int i = 0; i < 4; i++) {
-                groupBits.append(pointer.next());
-            }
+            IntStream.range(0, 4).forEach(i -> numberBits.append(pointer.next()));
             if (groupId == '0') {
                 endGroupReached = true;
             }
         }
-        return Long.valueOf(groupBits.toString(), 2);
+        return Long.valueOf(numberBits.toString(), 2);
     }
 
     private static long readOperator(ListIterator<Character> pointer, int type) {
@@ -94,24 +91,23 @@ public class Main {
 
     private static List<Long> readCountTypeSubPackets(ListIterator<Character> pointer) {
         List<Long> subNumbers = new ArrayList<>();
-        StringBuilder subPacketNum = new StringBuilder();
-        for (int i = 0; i < 11; i++) {
-            subPacketNum.append(pointer.next());
-        }
-        int subPacketsCount = Integer.valueOf(subPacketNum.toString(), 2);
-        for (int i = 0; i < subPacketsCount; i++) {
-            subNumbers.add(readPacket(pointer));
-        }
+        StringBuilder subPacketCountBuilder = new StringBuilder();
+
+        IntStream.range(0, 11).forEach(i -> subPacketCountBuilder.append(pointer.next()));
+
+        int subPacketsCount = Integer.valueOf(subPacketCountBuilder.toString(), 2);
+        IntStream.range(0, subPacketsCount).forEach(i -> subNumbers.add(readPacket(pointer)));
+
         return subNumbers;
     }
 
     private static List<Long> readLengthTypeSubPackets(ListIterator<Character> pointer) {
         List<Long> subNumbers = new ArrayList<>();
         StringBuilder lengthBuilder = new StringBuilder();
-        for (int i = 0; i < 15; i++) {
-            lengthBuilder.append(pointer.next());
-        }
+
+        IntStream.range(0, 15).forEach(i -> lengthBuilder.append(pointer.next()));
         int length = Integer.valueOf(lengthBuilder.toString(), 2);
+
         int begin = pointer.nextIndex();
         do {
             subNumbers.add(readPacket(pointer));
