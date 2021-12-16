@@ -17,7 +17,6 @@ public class Main {
         List<String> lines = readInput();
 
         String hexCode = lines.get(0);
-
         List<Character> binaries = new ArrayList<>();
         for (int i = 0; i < hexCode.length(); i++) {
             String hex = Character.toString(hexCode.charAt(i));
@@ -73,19 +72,19 @@ public class Main {
         }
         switch (type) {
             case 0:
-                return sum(subNumbers);
+                return subNumbers.stream().reduce(0L, Long::sum);
             case 1:
-                return product(subNumbers);
+                return subNumbers.stream().reduce(1L, (v1, v2) -> v1 * v2);
             case 2:
-                return min(subNumbers);
+                return subNumbers.stream().mapToLong(val -> val).min().orElseThrow(IllegalArgumentException::new);
             case 3:
-                return max(subNumbers);
+                return subNumbers.stream().mapToLong(val -> val).max().orElseThrow(IllegalArgumentException::new);
             case 5:
-                return gt(subNumbers);
+                return subNumbers.get(0) > subNumbers.get(1) ? 1 : 0;
             case 6:
-                return lt(subNumbers);
+                return subNumbers.get(0) < subNumbers.get(1) ? 1 : 0;
             case 7:
-                return eq(subNumbers);
+                return subNumbers.get(0).equals(subNumbers.get(1)) ? 1 : 0;
             default:
                 throw new IllegalArgumentException();
         }
@@ -94,7 +93,6 @@ public class Main {
     private static List<Long> readCountTypeSubPackets(ListIterator<Character> pointer) {
         List<Long> subNumbers = new ArrayList<>();
         StringBuilder subPacketCountBuilder = new StringBuilder();
-
         IntStream.range(0, 11).forEach(i -> subPacketCountBuilder.append(pointer.next()));
 
         int subPacketsCount = Integer.valueOf(subPacketCountBuilder.toString(), 2);
@@ -106,44 +104,15 @@ public class Main {
     private static List<Long> readLengthTypeSubPackets(ListIterator<Character> pointer) {
         List<Long> subNumbers = new ArrayList<>();
         StringBuilder lengthBuilder = new StringBuilder();
-
         IntStream.range(0, 15).forEach(i -> lengthBuilder.append(pointer.next()));
-        int length = Integer.valueOf(lengthBuilder.toString(), 2);
 
+        int length = Integer.valueOf(lengthBuilder.toString(), 2);
         int begin = pointer.nextIndex();
         do {
             subNumbers.add(readPacket(pointer));
         } while (pointer.nextIndex() < begin + length);
 
         return subNumbers;
-    }
-
-    private static long sum(List<Long> subNumbers) {
-        return subNumbers.stream().reduce(0L, Long::sum);
-    }
-
-    private static long product(List<Long> subNumbers) {
-        return subNumbers.stream().reduce(1L, (v1, v2) -> v1 * v2);
-    }
-
-    private static long min(List<Long> subNumbers) {
-        return subNumbers.stream().mapToLong(val -> val).min().orElseThrow(IllegalArgumentException::new);
-    }
-
-    private static long max(List<Long> subNumbers) {
-        return subNumbers.stream().mapToLong(val -> val).max().orElseThrow(IllegalArgumentException::new);
-    }
-
-    private static long gt(List<Long> subNumbers) {
-        return subNumbers.get(0) > subNumbers.get(1) ? 1 : 0;
-    }
-
-    private static long lt(List<Long> subNumbers) {
-        return subNumbers.get(0) < subNumbers.get(1) ? 1 : 0;
-    }
-
-    private static long eq(List<Long> subNumbers) {
-        return subNumbers.get(0).equals(subNumbers.get(1)) ? 1 : 0;
     }
 
     private static List<String> readInput() throws IOException {
