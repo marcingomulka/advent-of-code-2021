@@ -65,28 +65,13 @@ public class Main {
     }
 
     private static long readOperator(ListIterator<Character> pointer, int type) {
-        List<Long> subNumbers = new ArrayList<>();
+        List<Long> subNumbers;
         int legthType = Integer.valueOf(Character.toString(pointer.next()), 2);
         if (legthType == 0) {
-            StringBuilder lengthBuilder = new StringBuilder();
-            for (int i = 0; i < 15; i++) {
-                lengthBuilder.append(pointer.next());
-            }
-            int length = Integer.valueOf(lengthBuilder.toString(), 2);
-            int begin = pointer.nextIndex();
-            do {
-                subNumbers.add(readPacket(pointer));
-            } while (pointer.nextIndex() < begin + length);
+            subNumbers = readLengthTypeSubPackets(pointer);
 
         } else {
-            StringBuilder subPacketNum = new StringBuilder();
-            for (int i = 0; i < 11; i++) {
-                subPacketNum.append(pointer.next());
-            }
-            int subPacketsCount = Integer.valueOf(subPacketNum.toString(), 2);
-            for (int i = 0; i < subPacketsCount; i++) {
-                subNumbers.add(readPacket(pointer));
-            }
+            subNumbers = readCountTypeSubPackets(pointer);
         }
         switch (type) {
             case 0:
@@ -106,6 +91,34 @@ public class Main {
             default:
                 throw new IllegalArgumentException();
         }
+    }
+
+    private static List<Long> readCountTypeSubPackets(ListIterator<Character> pointer) {
+        List<Long> subNumbers = new ArrayList<>();
+        StringBuilder subPacketNum = new StringBuilder();
+        for (int i = 0; i < 11; i++) {
+            subPacketNum.append(pointer.next());
+        }
+        int subPacketsCount = Integer.valueOf(subPacketNum.toString(), 2);
+        for (int i = 0; i < subPacketsCount; i++) {
+            subNumbers.add(readPacket(pointer));
+        }
+        return subNumbers;
+    }
+
+    private static List<Long> readLengthTypeSubPackets(ListIterator<Character> pointer) {
+        List<Long> subNumbers = new ArrayList<>();
+        StringBuilder lengthBuilder = new StringBuilder();
+        for (int i = 0; i < 15; i++) {
+            lengthBuilder.append(pointer.next());
+        }
+        int length = Integer.valueOf(lengthBuilder.toString(), 2);
+        int begin = pointer.nextIndex();
+        do {
+            subNumbers.add(readPacket(pointer));
+        } while (pointer.nextIndex() < begin + length);
+
+        return subNumbers;
     }
 
     private static long sum(List<Long> subNumbers) {
