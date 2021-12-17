@@ -23,42 +23,39 @@ public class Main {
         Pair<Integer, Integer> xRange = new Pair<>(Integer.valueOf(xCoords[0]), Integer.valueOf(xCoords[1]));
         Pair<Integer, Integer> yRange = new Pair<>(Integer.valueOf(yCoords[0]), Integer.valueOf(yCoords[1]));
 
-        int xVelocity = 0;
-        int yVelocity = yRange.first - 1;
-
         List<Integer> velocityXHits = new ArrayList<>();
         List<Integer> velocityYHits = new ArrayList<>();
 
-        while (xVelocity <= xRange.second) {
-            xVelocity++;
-            if (simulateXPath(xVelocity, xRange)) {
-                velocityXHits.add(xVelocity);
+        int vx = 0;
+        int vy = yRange.first - 1;
+        while (vx <= xRange.second) {
+            vx++;
+            if (simulateXPath(vx, xRange)) {
+                velocityXHits.add(vx);
             }
         }
-        while (yVelocity <= -yRange.first) {
-            yVelocity++;
-            if (simulateYPath(yVelocity, yRange)) {
-                velocityYHits.add(yVelocity);
+        while (vy <= -yRange.first) {
+            vy++;
+            if (simulateYPath(vy, yRange)) {
+                velocityYHits.add(vy);
             }
         }
         int result = 0;
         for (int i = 0; i < velocityXHits.size(); i++) {
             for (int j = 0; j < velocityYHits.size(); j++) {
-                int vx = velocityXHits.get(i);
-                int vy = velocityYHits.get(j);
-                if (simulatePath(vx, vy, xRange, yRange)) {
+                if (simulatePath(velocityXHits.get(i), velocityYHits.get(j), xRange, yRange)) {
                     result++;
                 }
             }
         }
-        System.out.println("Part1: " + yMaxPos);
+        System.out.println("Part1: " + Main.yMaxPos);
         System.out.println("Part2: " + result);
     }
 
     private static boolean simulatePath(int vx, int vy, Pair<Integer, Integer> xRange, Pair<Integer, Integer> yRange) {
         int xPos = 0;
         int yPos = 0;
-        while (xPos < xRange.second && yPos >= yRange.first) {
+        while (xPos <= xRange.second && yPos >= yRange.first) {
             xPos += vx;
             yPos += vy;
             if ((xPos >= xRange.first && xPos <= xRange.second) && (yPos >= yRange.first && yPos <= yRange.second)) {
@@ -71,28 +68,27 @@ public class Main {
             }
         }
         return false;
-
     }
 
-    private static boolean simulateXPath(int xVelocity, Pair<Integer, Integer> xRange) {
+    private static boolean simulateXPath(int vx, Pair<Integer, Integer> xRange) {
         int xPos = 0;
-        while (xPos < xRange.second && xVelocity >= 0) {
-            xPos += xVelocity;
+        while (xPos < xRange.second && vx >= 0) {
+            xPos += vx;
             if (xPos >= xRange.first && xPos <= xRange.second) {
                 return true;
             }
-            xVelocity--;
+            vx--;
         }
         return false;
     }
 
-    private static boolean simulateYPath(int yVelocity, Pair<Integer, Integer> yRange) {
+    private static boolean simulateYPath(int vy, Pair<Integer, Integer> yRange) {
         int yPos = 0;
         int yCurrMax = 0;
         boolean hit = false;
 
         while (yPos >= yRange.first) {
-            yPos += yVelocity;
+            yPos += vy;
             if (yPos > yCurrMax) {
                 yCurrMax = yPos;
             }
@@ -100,11 +96,11 @@ public class Main {
                 hit = true;
                 break;
             }
-            yVelocity--;
+            vy--;
         }
         if (hit) {
-            if (yCurrMax > yMaxPos) {
-                yMaxPos = yCurrMax;
+            if (yCurrMax > Main.yMaxPos) {
+                Main.yMaxPos = yCurrMax;
             }
         }
         return hit;
