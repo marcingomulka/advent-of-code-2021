@@ -3,10 +3,7 @@ package org.example.advent.day18;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -61,19 +58,17 @@ public class Main {
     }
 
     private static boolean explode(Node master) {
-        Node toExplode = searchForExplosion(master, 0);
-        if (toExplode != null) {
+        Optional<Node> foundExplosion = searchForExplosion(master, 0);
+        if (foundExplosion.isPresent()) {
+            Node toExplode = foundExplosion.get();
             int leftInt = toExplode.left.number;
             int rightInt = toExplode.right.number;
 
-            Node before = searchPrecedingNode(toExplode.left, master);
-            Node after = searchFollowingNode(toExplode.right, master);
-            if (before != null) {
-                before.number += leftInt;
-            }
-            if (after != null) {
-                after.number += rightInt;
-            }
+            searchPrecedingNode(toExplode.left, master)
+                    .ifPresent(before -> before.number += leftInt);
+            searchFollowingNode(toExplode.right, master)
+                    .ifPresent(after -> after.number += rightInt);
+
             toExplode.number = 0;
             toExplode.left = null;
             toExplode.right = null;
@@ -82,17 +77,17 @@ public class Main {
         return false;
     }
 
-    private static Node searchForExplosion(Node master, int level) {
+    private static Optional<Node> searchForExplosion(Node master, int level) {
         Node left = master.left;
         Node right = master.right;
         if (master.isLeaf()) {
-            return null;
+            return Optional.empty();
         }
         if (left.isLeaf() && right.isLeaf() && level >= 4) {
-            return master;
+            return Optional.of(master);
         } else {
-            Node foundLeft = searchForExplosion(left, level + 1);
-            return foundLeft != null ? foundLeft : searchForExplosion(right, level + 1);
+            return searchForExplosion(left, level + 1)
+                    .or(() -> searchForExplosion(right, level + 1));
         }
     }
 
@@ -114,16 +109,16 @@ public class Main {
     }
 
 
-    private static Node searchPrecedingNode(Node node, Node root) {
+    private static Optional<Node> searchPrecedingNode(Node node, Node root) {
         List<Node> leafs = leaves(root);
         int i = leafs.indexOf(node) - 1;
-        return i >= 0 ? leafs.get(i) : null;
+        return i >= 0 ? Optional.of(leafs.get(i)) : Optional.empty();
     }
 
-    private static Node searchFollowingNode(Node node, Node root) {
+    private static Optional<Node> searchFollowingNode(Node node, Node root) {
         List<Node> leafs = leaves(root);
         int i = leafs.indexOf(node) + 1;
-        return i < leafs.size() ? leafs.get(i) : null;
+        return i < leafs.size() ? Optional.of(leafs.get(i)) : Optional.empty();
     }
 
     private static List<Node> leaves(Node root) {
