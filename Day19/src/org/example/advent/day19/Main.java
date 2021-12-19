@@ -71,7 +71,7 @@ public class Main {
         Set<Triple> beacons = processScannerResults(0, scannerRelations, pairToTransformation, scanners, new HashSet<>());
         System.out.println("Part1: " + beacons.size());
 
-        Set<Triple> scannersPositions = collectScanners(0, scannerRelations, pairToTransformation, new Triple(0, 0, 0), new HashSet<>());
+        Set<Triple> scannersPositions = collectScanners(0, scannerRelations, pairToTransformation, new HashSet<>());
         List<Triple> scannerList = new ArrayList<>(scannersPositions);
 
         long maxDistance = 0L;
@@ -92,21 +92,20 @@ public class Main {
     }
 
     private static Set<Triple> collectScanners(int scannerId, Map<Integer, Set<Integer>> relations,
-                                               Map<Pair<Integer, Integer>, Pair<Integer[][], Triple>> pairToTransformation, Triple position, HashSet<Object> alreadyProcessed) {
+                                               Map<Pair<Integer, Integer>, Pair<Integer[][], Triple>> pairToTransformation, HashSet<Object> alreadyProcessed) {
 
+        Triple position = new Triple(0, 0, 0);
         Set<Triple> scanners = new HashSet<>();
         scanners.add(position);
 
         alreadyProcessed.add(scannerId);
         for (Integer match : relations.get(scannerId)) {
             var transformation = pairToTransformation.get(new Pair<>(scannerId, match));
-            Triple matchPosition = translate(
-                    rotate(position, transformation.first),
-                    transformation.second);
+            Triple matchPosition = translate(rotate(position, transformation.first), transformation.second);
             scanners.add(matchPosition);
 
             if (relations.containsKey(match) && !alreadyProcessed.contains(match)) {
-                Set<Triple> related = collectScanners(match, relations, pairToTransformation, position, alreadyProcessed)
+                Set<Triple> related = collectScanners(match, relations, pairToTransformation, alreadyProcessed)
                         .stream()
                         .map(point -> rotate(point, transformation.first))
                         .map(point -> translate(point, transformation.second))
@@ -115,10 +114,6 @@ public class Main {
             }
         }
         return scanners;
-    }
-
-    private static Triple inverse(Triple vector) {
-        return new Triple(-vector.first, -vector.second, -vector.third);
     }
 
     private static Set<Triple> processScannerResults(int scannerId, Map<Integer, Set<Integer>> relations, Map<Pair<Integer, Integer>, Pair<Integer[][], Triple>> pairToTransformation,
