@@ -41,37 +41,37 @@ public class Main {
     public static void main(String[] args) throws IOException {
         List<String> lines = readInput();
 
-        Map<Integer, List<Triple>> scanners = new HashMap<>();
-        int scanner = -1;
+        Map<Integer, List<Triple>> scannerPoints = new HashMap<>();
+        int scannerNum = -1;
 
         for (String line : lines) {
             if (line.startsWith("---")) {
-                scanner++;
+                scannerNum++;
             } else if (!line.isEmpty()) {
                 String[] coords = line.split(",");
                 Triple point = new Triple(Integer.valueOf(coords[0]), Integer.valueOf(coords[1]), Integer.valueOf(coords[2]));
-                scanners.computeIfAbsent(scanner, k -> new ArrayList<>()).add(point);
+                scannerPoints.computeIfAbsent(scannerNum, k -> new ArrayList<>()).add(point);
             }
         }
-        Map<Pair<Integer, Integer>, Pair<Integer[][], Triple>> pairToTransformation = new HashMap<>();
+        Map<Pair<Integer, Integer>, Transformation> scannersTransformations = new HashMap<>();
         Map<Integer, Set<Integer>> scannerRelations = new HashMap<>();
 
-        for (int i = 0; i < scanners.keySet().size(); i++) {
-            for (int j = 0; j < scanners.keySet().size(); j++) {
+        for (int i = 0; i < scannerPoints.keySet().size(); i++) {
+            for (int j = 0; j < scannerPoints.keySet().size(); j++) {
                 if (i == j) {
                     continue;
                 }
-                Pair<Integer[][], Triple> transformation = tryMatchScanners(scanners.get(i), scanners.get(j));
-                if (transformation.first != null) {
-                    pairToTransformation.put(new Pair<>(i, j), transformation);
+                Optional<Transformation> transformation = tryMatchScanners(scannerPoints.get(i), scannerPoints.get(j));
+                if (transformation.isPresent()) {
+                    scannersTransformations.put(new Pair<>(i, j), transformation.get());
                     scannerRelations.computeIfAbsent(i, k -> new HashSet<>()).add(j);
                 }
             }
         }
-        Set<Triple> beacons = collectBeacons(0, scannerRelations, pairToTransformation, scanners, new HashSet<>());
+        Set<Triple> beacons = collectBeacons(0, scannerRelations, scannersTransformations, scannerPoints, new HashSet<>());
         System.out.println("Part1: " + beacons.size());
 
-        Set<Triple> scannersPositions = collectScanners(0, scannerRelations, pairToTransformation, new HashSet<>());
+        Set<Triple> scannersPositions = collectScanners(0, scannerRelations, scannersTransformations, new HashSet<>());
         List<Triple> scannerList = new ArrayList<>(scannersPositions);
 
         long maxDistance = 0L;
@@ -92,23 +92,22 @@ public class Main {
     }
 
     private static Set<Triple> collectScanners(int scannerId, Map<Integer, Set<Integer>> relations,
-                                               Map<Pair<Integer, Integer>, Pair<Integer[][], Triple>> pairToTransformation, HashSet<Object> alreadyProcessed) {
+                                               Map<Pair<Integer, Integer>, Transformation> scannersTransformations, HashSet<Object> alreadyProcessed) {
 
         Triple position = new Triple(0, 0, 0);
         Set<Triple> scanners = new HashSet<>();
         scanners.add(position);
 
         alreadyProcessed.add(scannerId);
-        for (Integer match : relations.get(scannerId)) {
-            var transformation = pairToTransformation.get(new Pair<>(scannerId, match));
-            Triple matchPosition = translate(rotate(position, transformation.first), transformation.second);
+        for (Integer matchedScannerId : relations.get(scannerId)) {
+            var transformation = scannersTransformations.get(new Pair<>(scannerId, matchedScannerId));
+            Triple matchPosition = transformation.transform(position);
             scanners.add(matchPosition);
 
-            if (relations.containsKey(match) && !alreadyProcessed.contains(match)) {
-                Set<Triple> related = collectScanners(match, relations, pairToTransformation, alreadyProcessed)
+            if (relations.containsKey(matchedScannerId) && !alreadyProcessed.contains(matchedScannerId)) {
+                Set<Triple> related = collectScanners(matchedScannerId, relations, scannersTransformations, alreadyProcessed)
                         .stream()
-                        .map(point -> rotate(point, transformation.first))
-                        .map(point -> translate(point, transformation.second))
+                        .map(transformation::transform)
                         .collect(Collectors.toSet());
                 scanners.addAll(related);
             }
@@ -116,41 +115,39 @@ public class Main {
         return scanners;
     }
 
-    private static Set<Triple> collectBeacons(int scannerId, Map<Integer, Set<Integer>> relations, Map<Pair<Integer, Integer>, Pair<Integer[][], Triple>> pairToTransformation,
-                                              Map<Integer, List<Triple>> scanners, Set<Integer> alreadyProcessed) {
+    private static Set<Triple> collectBeacons(int scannerId, Map<Integer, Set<Integer>> relations,
+                                              Map<Pair<Integer, Integer>, Transformation> scannersTransformations,
+                                              Map<Integer, List<Triple>> scannerPoints, Set<Integer> alreadyProcessed) {
         alreadyProcessed.add(scannerId);
-        Set<Triple> originalList = new HashSet<>(scanners.get(scannerId));
-        for (Integer match : relations.get(scannerId)) {
-            var transformation = pairToTransformation.get(new Pair<>(scannerId, match));
+        Set<Triple> beaconList = new HashSet<>(scannerPoints.get(scannerId));
+        for (Integer matchedScannerId : relations.get(scannerId)) {
+            var transformation = scannersTransformations.get(new Pair<>(scannerId, matchedScannerId));
 
-            Set<Triple> transformed = scanners.get(match).stream()
-                    .map(point -> rotate(point, transformation.first))
-                    .map(point -> translate(point, transformation.second))
+            Set<Triple> transformed = scannerPoints.get(matchedScannerId).stream()
+                    .map(transformation::transform)
                     .collect(Collectors.toSet());
 
-            originalList.addAll(transformed);
+            beaconList.addAll(transformed);
 
-            if (relations.containsKey(match) && !alreadyProcessed.contains(match)) {
-                Set<Triple> related = collectBeacons(match, relations, pairToTransformation, scanners, alreadyProcessed).stream()
-                        .map(point -> rotate(point, transformation.first))
-                        .map(point -> translate(point, transformation.second))
+            if (relations.containsKey(matchedScannerId) && !alreadyProcessed.contains(matchedScannerId)) {
+                Set<Triple> related = collectBeacons(matchedScannerId, relations, scannersTransformations, scannerPoints, alreadyProcessed).stream()
+                        .map(transformation::transform)
                         .collect(Collectors.toSet());
 
-                originalList.addAll(related);
+                beaconList.addAll(related);
             }
         }
-        return originalList;
+        return beaconList;
     }
 
 
-    private static Pair<Integer[][], Triple> tryMatchScanners(List<Triple> scanner1, List<Triple> scanner2) {
+    private static Optional<Transformation> tryMatchScanners(List<Triple> scannerList1, List<Triple> scannerList2) {
         List<Triple> rotated;
         for (Integer[][] rotation : ROTATIONS) {
-            rotated = scanner2.stream()
+            rotated = scannerList2.stream()
                     .map(point -> rotate(point, rotation))
                     .collect(Collectors.toList());
-
-            for (Triple point1 : scanner1) {
+            for (Triple point1 : scannerList1) {
                 for (Triple point2 : rotated) {
                     Triple translation = vector(point2, point1);
 
@@ -158,26 +155,25 @@ public class Main {
                             .map(point -> translate(point, translation))
                             .collect(Collectors.toList());
 
-                    List<Triple> matched = match(translated, scanner1);
+                    List<Triple> matched = match(translated, scannerList1);
                     if (matched.size() >= 12) {
-                        return new Pair<>(rotation, translation);
+                        return Optional.of(new Transformation(rotation, translation));
                     }
                 }
             }
-
         }
-        return new Pair<>(null, null);
+        return Optional.empty();
     }
 
     private static Triple vector(Triple p1, Triple p2) {
         return new Triple(p2.first - p1.first, p2.second - p1.second, p2.third - p1.third);
     }
 
-    private static Triple translate(Triple point, Triple vector) {
+    static Triple translate(Triple point, Triple vector) {
         return new Triple(point.first + vector.first, point.second + vector.second, point.third + vector.third);
     }
 
-    private static Triple rotate(Triple point, Integer[][] matrix) {
+    static Triple rotate(Triple point, Integer[][] matrix) {
         Triple result = new Triple(0, 0, 0);
         for (int i = 0; i < 3; i++) {
             int sum = 0;
@@ -201,6 +197,20 @@ public class Main {
             lines = reader.lines().collect(Collectors.toList());
         }
         return lines;
+    }
+}
+
+class Transformation {
+    Integer[][] rotation;
+    Triple translation;
+
+    public Transformation(Integer[][] rotation, Triple translation) {
+        this.rotation = rotation;
+        this.translation = translation;
+    }
+
+    public Triple transform(Triple point) {
+        return Main.translate(Main.rotate(point, rotation), translation);
     }
 }
 
