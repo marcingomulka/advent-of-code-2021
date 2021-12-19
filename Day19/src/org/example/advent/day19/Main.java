@@ -68,7 +68,7 @@ public class Main {
                 }
             }
         }
-        Set<Triple> beacons = processScannerResults(0, scannerRelations, pairToTransformation, scanners, new HashSet<>());
+        Set<Triple> beacons = collectBeacons(0, scannerRelations, pairToTransformation, scanners, new HashSet<>());
         System.out.println("Part1: " + beacons.size());
 
         Set<Triple> scannersPositions = collectScanners(0, scannerRelations, pairToTransformation, new HashSet<>());
@@ -116,8 +116,8 @@ public class Main {
         return scanners;
     }
 
-    private static Set<Triple> processScannerResults(int scannerId, Map<Integer, Set<Integer>> relations, Map<Pair<Integer, Integer>, Pair<Integer[][], Triple>> pairToTransformation,
-                                                     Map<Integer, List<Triple>> scanners, Set<Integer> alreadyProcessed) {
+    private static Set<Triple> collectBeacons(int scannerId, Map<Integer, Set<Integer>> relations, Map<Pair<Integer, Integer>, Pair<Integer[][], Triple>> pairToTransformation,
+                                              Map<Integer, List<Triple>> scanners, Set<Integer> alreadyProcessed) {
         alreadyProcessed.add(scannerId);
         Set<Triple> originalList = new HashSet<>(scanners.get(scannerId));
         for (Integer match : relations.get(scannerId)) {
@@ -131,7 +131,7 @@ public class Main {
             originalList.addAll(transformed);
 
             if (relations.containsKey(match) && !alreadyProcessed.contains(match)) {
-                Set<Triple> related = processScannerResults(match, relations, pairToTransformation, scanners, alreadyProcessed).stream()
+                Set<Triple> related = collectBeacons(match, relations, pairToTransformation, scanners, alreadyProcessed).stream()
                         .map(point -> rotate(point, transformation.first))
                         .map(point -> translate(point, transformation.second))
                         .collect(Collectors.toSet());
