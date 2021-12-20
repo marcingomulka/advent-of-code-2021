@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -100,55 +99,18 @@ public class Main {
         int index = Integer.valueOf(collectCode(i, j, map, voidChar), 2);
         return enhanceList.get(index);
     }
-
     private static String collectCode(int x, int y, Character[][] map, char voidChar) {
         StringBuilder buffer = new StringBuilder();
-
-        BiPredicate<Integer, Integer> up = (i, j) -> i - 1 >= 0;
-        BiPredicate<Integer, Integer> down = (i, j) -> i + 1 < map.length;
-        BiPredicate<Integer, Integer> left = (i, j) -> j - 1 >= 0;
-        BiPredicate<Integer, Integer> right = (i, j) -> j + 1 < map[i].length;
-
-        if (up.test(x, y) && left.test(x, y)) {
-            buffer.append(map[x - 1][y - 1]);
-        } else if (!up.test(x, y) || !left.test(x, y)) {
-            buffer.append(voidChar);
-        }
-        if (up.test(x, y)) {
-            buffer.append(map[x - 1][y]);
-        } else {
-            buffer.append(voidChar);
-        }
-        if (up.test(x, y) && right.test(x, y)) {
-            buffer.append(map[x - 1][y + 1]);
-        } else if (!up.test(x, y) || !right.test(x, y)) {
-            buffer.append(voidChar);
-        }
-        if (left.test(x, y)) {
-            buffer.append(map[x][y - 1]);
-        } else {
-            buffer.append(voidChar);
-        }
-        buffer.append(map[x][y]);
-        if (right.test(x, y)) {
-            buffer.append(map[x][y + 1]);
-        } else {
-            buffer.append(voidChar);
-        }
-        if (down.test(x, y) && left.test(x, y)) {
-            buffer.append(map[x + 1][y - 1]);
-        } else if (!down.test(x, y) || !left.test(x, y)) {
-            buffer.append(voidChar);
-        }
-        if (down.test(x, y)) {
-            buffer.append(map[x + 1][y]);
-        } else {
-            buffer.append(voidChar);
-        }
-        if (down.test(x, y) && right.test(x, y)) {
-            buffer.append(map[x + 1][y + 1]);
-        } else if (!down.test(x, y) || !right.test(x, y)) {
-            buffer.append(voidChar);
+        for (int i = x - 1; i <= x + 1; i++) {
+            for (int j = y - 1; j <= y + 1; j++) {
+                if (i < 0 || i >= map.length) {
+                    buffer.append(voidChar);
+                } else if (j < 0 || j >= map[0].length) {
+                    buffer.append(voidChar);
+                } else {
+                    buffer.append(map[i][j]);
+                }
+            }
         }
         String result = buffer.toString().replace(".", "0");
         return result.replace("#", "1");
