@@ -21,14 +21,13 @@ public class Main {
         maxRows += 2;
         maxCols += 2;
         Character[][] map = new Character[maxRows][maxCols];
-
-        int row = 1;
+        int row = 0;
         for (String line : lines) {
             if (line.isEmpty() || line.length() == 512) {
                 continue;
             }
-            for (int j = 1; j < line.length() + 1; j++) {
-                map[row][j] = line.charAt(j - 1);
+            for (int j = 0; j < line.length(); j++) {
+                map[row + 1][j + 1] = line.charAt(j);
             }
             row++;
         }
