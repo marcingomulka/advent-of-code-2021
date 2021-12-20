@@ -11,23 +11,20 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         List<String> lines = readInput();
-        String enhanceStr = lines.get(0);
 
-        List<Character> enhanceList = enhanceStr.chars()
-                .mapToObj(ch -> Character.toString((char) ch).charAt(0))
+        List<Character> enhanceList = lines.get(0).chars()
+                .mapToObj(ch -> (char) ch)
                 .collect(Collectors.toList());
 
         int maxRows = lines.size() - 2;
         int maxCols = lines.get(2).length();
         maxRows += 2;
         maxCols += 2;
-
         Character[][] map = new Character[maxRows][maxCols];
+
         int row = 1;
-        int skip = 0;
         for (String line : lines) {
-            if (skip < 2) {
-                skip++;
+            if (line.isEmpty() || line.length() == 512) {
                 continue;
             }
             for (int j = 1; j < line.length() + 1; j++) {
@@ -35,8 +32,9 @@ public class Main {
             }
             row++;
         }
-        Character[][] newMap;
         fillBorders(map, '.');
+
+        Character[][] newMap;
         for (int step = 1; step <= 50; step++) {
             maxRows += 2;
             maxCols += 2;
@@ -45,8 +43,7 @@ public class Main {
             char voidChar = getVoidCharacter(step, enhanceList);
             for (int i = 0; i < map.length; i++) {
                 for (int j = 0; j < map[i].length; j++) {
-                    Character value = pixelValue(i, j, map, enhanceList, voidChar);
-                    newMap[i + 1][j + 1] = value;
+                    newMap[i + 1][j + 1] = enhanceList.get(Integer.valueOf(collectCode(i, j, map, voidChar), 2));
                 }
             }
             fillBorders(newMap, getVoidCharacter(step + 1, enhanceList));
@@ -95,10 +92,6 @@ public class Main {
         }
     }
 
-    private static Character pixelValue(int i, int j, Character[][] map, List<Character> enhanceList, char voidChar) {
-        int index = Integer.valueOf(collectCode(i, j, map, voidChar), 2);
-        return enhanceList.get(index);
-    }
     private static String collectCode(int x, int y, Character[][] map, char voidChar) {
         StringBuilder buffer = new StringBuilder();
         for (int i = x - 1; i <= x + 1; i++) {
