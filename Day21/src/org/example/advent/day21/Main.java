@@ -21,16 +21,7 @@ public class Main {
         int player2Start = Integer.valueOf(lines.get(1).replace("Player 2 starting position: ", ""));
 
         System.out.println("Part1: " + part1(player1Start, player2Start));
-
-        Pair result = new Pair(0L, 0L);
-        PlayerState player1 = new PlayerState(1, player1Start);
-        PlayerState player2 = new PlayerState(2, player2Start);
-
-        for (int i = 1; i <= DIRAC_DIE_SIZE; i++) {
-            result.add(turn(i, 1, player1, player1, player2, new HashMap<>()));
-        }
-        long winnerResult = result.first > result.second ? result.first : result.second;
-        System.out.println("Part2: " + winnerResult);
+        System.out.println("Part2: " + part2(player1Start, player2Start));
     }
 
     private static int part1(int player1Start, int player2Start) {
@@ -60,18 +51,26 @@ public class Main {
         return loserScore * die.rollCount();
     }
 
+    private static long part2(int player1Start, int player2Start) {
+        Pair result = new Pair(0L, 0L);
+        PlayerState player1 = new PlayerState(1, player1Start);
+        PlayerState player2 = new PlayerState(2, player2Start);
+
+        for (int i = 1; i <= DIRAC_DIE_SIZE; i++) {
+            result.add(turn(i, 1, player1, player1, player2, new HashMap<>()));
+        }
+        return result.first > result.second ? result.first : result.second;
+    }
+
     private static Pair turn(int die, int roll, PlayerState activePlayer, PlayerState player1, PlayerState player2,
                              Map<Key, Pair> cache) {
 
-        Key key = new Key(die, activePlayer.getNumber(), roll,
-                player1.getPosition(), player2.getPosition(),
-                player1.getScore(), player2.getScore());
-
+        Key key = new Key(die, roll, activePlayer, player1, player2);
         Pair result = cache.get(key);
         if (result != null) {
             return result;
         }
-        PlayerState previousSate = activePlayer.copy();
+        PlayerState previousState = activePlayer.copy();
 
         activePlayer.move(die);
         if (roll == ROLL_COUNT) {
@@ -80,7 +79,7 @@ public class Main {
 
                 Pair won = activePlayer.getNumber() == 1 ? new Pair(1, 0) : new Pair(0, 1);
                 cache.put(key, won);
-                activePlayer.reset(previousSate);
+                activePlayer.reset(previousState);
                 return won;
             }
         }
@@ -97,7 +96,7 @@ public class Main {
             }
         }
         cache.put(key, sum);
-        activePlayer.reset(previousSate);
+        activePlayer.reset(previousState);
         return sum;
     }
 
@@ -176,9 +175,9 @@ class PlayerState {
         return player;
     }
 
-    public void reset(PlayerState previousSate) {
-        this.position = previousSate.position;
-        this.score = previousSate.score;
+    public void reset(PlayerState previousState) {
+        this.position = previousState.position;
+        this.score = previousState.score;
     }
 }
 
@@ -191,27 +190,14 @@ class Key {
     private final int player1Score;
     private final int player2Score;
 
-    public Key(int die, int player, int roll, int player1Pos, int player2Pos, int player1Score, int player2Score) {
+    public Key(int die, int roll, PlayerState activePlayer, PlayerState player1, PlayerState player2) {
         this.die = die;
-        this.player = player;
+        this.player = activePlayer.getNumber();
         this.roll = roll;
-        this.player1Pos = player1Pos;
-        this.player2Pos = player2Pos;
-        this.player1Score = player1Score;
-        this.player2Score = player2Score;
-    }
-
-    @Override
-    public String toString() {
-        return "{" +
-                "die=" + die +
-                ", player=" + player +
-                ", roll=" + roll +
-                ", player1Pos=" + player1Pos +
-                ", player2Pos=" + player2Pos +
-                ", player1Score=" + player1Score +
-                ", player2Score=" + player2Score +
-                '}';
+        this.player1Pos = player1.getPosition();
+        this.player2Pos = player2.getPosition();
+        this.player1Score = player1.getScore();
+        this.player2Score = player2.getScore();
     }
 
     @Override
