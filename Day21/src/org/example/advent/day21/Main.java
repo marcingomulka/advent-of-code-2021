@@ -72,27 +72,24 @@ public class Main {
         }
         PlayerState previousState = activePlayer.copy();
 
+        Pair sum = new Pair(0L, 0L);
         activePlayer.move(die);
         if (roll == ROLL_COUNT) {
             activePlayer.addScore(activePlayer.getPosition());
             if (activePlayer.getScore() >= WINNING_SCORE_PART2) {
-
                 Pair won = activePlayer.getNumber() == 1 ? new Pair(1, 0) : new Pair(0, 1);
                 cache.put(key, won);
                 activePlayer.reset(previousState);
                 return won;
             }
-        }
-        Pair sum = new Pair(0L, 0L);
-        if (roll < ROLL_COUNT) {
-            roll++;
-            for (int i = 1; i <= DIRAC_DIE_SIZE; i++) {
-                sum.add(turn(i, roll, activePlayer, player1, player2, cache));
-            }
-        } else {
             PlayerState nextPlayer = activePlayer.getNumber() == 1 ? player2 : player1;
             for (int i = 1; i <= DIRAC_DIE_SIZE; i++) {
                 sum.add(turn(i, 1, nextPlayer, player1, player2, cache));
+            }
+        } else {
+            roll++;
+            for (int i = 1; i <= DIRAC_DIE_SIZE; i++) {
+                sum.add(turn(i, roll, activePlayer, player1, player2, cache));
             }
         }
         cache.put(key, sum);
