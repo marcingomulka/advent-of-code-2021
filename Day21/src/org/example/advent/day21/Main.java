@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
 
@@ -56,9 +57,9 @@ public class Main {
         PlayerState player1 = new PlayerState(1, player1Start);
         PlayerState player2 = new PlayerState(2, player2Start);
 
-        for (int i = 1; i <= DIRAC_DIE_SIZE; i++) {
-            result.add(turn(i, 1, player1, player1, player2, new HashMap<>()));
-        }
+        IntStream.rangeClosed(1, DIRAC_DIE_SIZE)
+                .forEach(die -> result.add(turn(die, 1, player1, player1, player2, new HashMap<>())));
+
         return result.first > result.second ? result.first : result.second;
     }
 
@@ -83,14 +84,11 @@ public class Main {
                 return won;
             }
             PlayerState nextPlayer = activePlayer.getNumber() == 1 ? player2 : player1;
-            for (int i = 1; i <= DIRAC_DIE_SIZE; i++) {
-                sum.add(turn(i, 1, nextPlayer, player1, player2, cache));
-            }
+            IntStream.rangeClosed(1, DIRAC_DIE_SIZE)
+                    .forEach(i -> sum.add(turn(i, 1, nextPlayer, player1, player2, cache)));
         } else {
-            roll++;
-            for (int i = 1; i <= DIRAC_DIE_SIZE; i++) {
-                sum.add(turn(i, roll, activePlayer, player1, player2, cache));
-            }
+            IntStream.rangeClosed(1, DIRAC_DIE_SIZE)
+                    .forEach(i -> sum.add(turn(i, roll + 1, activePlayer, player1, player2, cache)));
         }
         cache.put(key, sum);
         activePlayer.reset(previousState);
