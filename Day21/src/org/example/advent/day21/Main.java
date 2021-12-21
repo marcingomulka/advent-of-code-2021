@@ -53,12 +53,12 @@ public class Main {
     }
 
     private static long part2(int player1Start, int player2Start) {
-        Pair result = new Pair(0L, 0L);
         PlayerState player1 = new PlayerState(1, player1Start);
         PlayerState player2 = new PlayerState(2, player2Start);
 
-        IntStream.rangeClosed(1, DIRAC_DIE_SIZE)
-                .forEach(die -> result.add(turn(die, 1, player1, player1, player2, new HashMap<>())));
+        Pair result = IntStream.rangeClosed(1, DIRAC_DIE_SIZE)
+                .mapToObj(die -> turn(die, 1, player1, player1, player2, new HashMap<>()))
+                .reduce(new Pair(0L, 0L), Pair::add);
 
         return result.first > result.second ? result.first : result.second;
     }
@@ -73,7 +73,7 @@ public class Main {
         }
         PlayerState previousState = activePlayer.copy();
 
-        Pair sum = new Pair(0L, 0L);
+        Pair sum;
         activePlayer.move(die);
         if (roll == ROLL_COUNT) {
             activePlayer.addScore(activePlayer.getPosition());
@@ -84,11 +84,13 @@ public class Main {
                 return won;
             }
             PlayerState nextPlayer = activePlayer.getNumber() == 1 ? player2 : player1;
-            IntStream.rangeClosed(1, DIRAC_DIE_SIZE)
-                    .forEach(i -> sum.add(turn(i, 1, nextPlayer, player1, player2, cache)));
+            sum = IntStream.rangeClosed(1, DIRAC_DIE_SIZE)
+                    .mapToObj(i -> turn(i, 1, nextPlayer, player1, player2, cache))
+                    .reduce(new Pair(0L, 0L), Pair::add);
         } else {
-            IntStream.rangeClosed(1, DIRAC_DIE_SIZE)
-                    .forEach(i -> sum.add(turn(i, roll + 1, activePlayer, player1, player2, cache)));
+            sum = IntStream.rangeClosed(1, DIRAC_DIE_SIZE)
+                    .mapToObj(i -> turn(i, roll + 1, activePlayer, player1, player2, cache))
+                    .reduce(new Pair(0L, 0L), Pair::add);
         }
         cache.put(key, sum);
         activePlayer.reset(previousState);
