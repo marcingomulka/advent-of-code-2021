@@ -56,8 +56,9 @@ public class Main {
         PlayerState player1 = new PlayerState(1, player1Start);
         PlayerState player2 = new PlayerState(2, player2Start);
 
+        Map<Key, Pair> cache = new HashMap<>();
         Pair result = IntStream.rangeClosed(1, DIRAC_DIE_SIZE)
-                .mapToObj(die -> turn(die, 1, player1, player1, player2, new HashMap<>()))
+                .mapToObj(die -> turn(die, 1, player1, player1, player2, cache))
                 .reduce(new Pair(0L, 0L), Pair::add);
 
         return result.first > result.second ? result.first : result.second;
