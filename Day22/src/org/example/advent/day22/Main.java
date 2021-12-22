@@ -30,14 +30,10 @@ public class Main {
             cuboids.add(new Cuboid(chunks[0], xRange, yRange, zRange));
         }
 
-        boolean[][][] initReactor = new boolean[101][101][101];
+        List<Cuboid> initialProcessed = new ArrayList<>();
         List<Cuboid> processed = new ArrayList<>();
+
         for (Cuboid cuboid : cuboids) {
-
-            if (inRange(cuboid)) {
-                switchReactor(cuboid.operation, cuboid, initReactor);
-            }
-
             List<Cuboid> newProcessed = new ArrayList<>();
             for (Cuboid processedCuboid : processed) {
                 newProcessed.add(processedCuboid);
@@ -46,14 +42,20 @@ public class Main {
             if (cuboid.operation.equals("on")) {
                 newProcessed.add(cuboid);
             }
+            if (inInitialRange(cuboid)) {
+                initialProcessed = newProcessed;
+            }
             processed = newProcessed;
 
         }
+        long initReactorCubesOnCount = initialProcessed.stream()
+                .mapToLong(Main::volume)
+                .sum();
         long fullReactorCubesOnCount = processed.stream()
                 .mapToLong(Main::volume)
                 .sum();
 
-        System.out.println("Part1: " + countCubesOn(initReactor));
+        System.out.println("Part1: " + initReactorCubesOnCount);
         System.out.println("Part2: " + fullReactorCubesOnCount);
     }
 
@@ -90,39 +92,7 @@ public class Main {
         }
     }
 
-    private static long countCubesOn(boolean[][][] reactor) {
-        long sum = 0L;
-        for (int i = 0; i < reactor.length; i++) {
-            for (int j = 0; j < reactor[i].length; j++) {
-                for (int k = 0; k < reactor[i][j].length; k++) {
-                    if (reactor[i][j][k]) {
-                        sum++;
-                    }
-                }
-            }
-        }
-        return sum;
-    }
-
-    private static void switchReactor(String operation, Cuboid range, boolean[][][] reactor) {
-        Pair<Integer, Integer> xRange = range.first;
-        Pair<Integer, Integer> yRange = range.second;
-        Pair<Integer, Integer> zRange = range.third;
-
-        int xOffset = 50;
-        int yOffset = 50;
-        int zOffset = 50;
-
-        for (int i = xRange.first; i <= xRange.second; i++) {
-            for (int j = yRange.first; j <= yRange.second; j++) {
-                for (int k = zRange.first; k <= zRange.second; k++) {
-                    reactor[xOffset + i][yOffset + j][zOffset + k] = operation.equals("on");
-                }
-            }
-        }
-    }
-
-    private static boolean inRange(Cuboid range) {
+    private static boolean inInitialRange(Cuboid range) {
         return range.first.first >= -50 && range.first.second <= 50
                 && range.second.first >= -50 && range.second.second <= 50
                 && range.third.first >= -50 && range.third.second <= 50;
