@@ -1,8 +1,6 @@
 package org.example.advent.day23;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -34,6 +32,12 @@ public class Main {
             'B', 1,
             'C', 2,
             'D', 3
+    );
+    private static Map<Integer, Character> roomLetters = Map.of(
+            0, 'A',
+            1, 'B',
+            2, 'C',
+            3, 'D'
     );
 
     public static void main(String[] args) throws IOException {
@@ -71,6 +75,22 @@ public class Main {
         System.out.println("Partial solutions: " + costs);
         System.out.println("Part1: " + minCost);
         System.out.println("Time: " + Duration.between(beginTime, Instant.now()).toSeconds() + " s");
+
+        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        cacheHit = 0L;
+        Arrays.fill(hallway, '.');
+        beginTime = Instant.now();
+
+        costs = new PriorityQueue<>();
+        costs.add(Long.MAX_VALUE);
+        long minCostPart2 = trySolve(hallway, roomsPart2, 0L, costs, new HashMap<>());
+
+        System.out.println("Cache hits: " + cacheHit);
+        System.out.println("Partial solutions: " + costs);
+        System.out.println("Part2: " + minCostPart2);
+        System.out.println("Time: " + Duration.between(beginTime, Instant.now()).toSeconds() + " s");
+
+        System.out.println("HURRRAY, IT FINISHED!!!!!!!!!!!!!!!!!11111");
     }
 
     private static long trySolve(int[] hallway, List<int[]> rooms, long currentCost, PriorityQueue<Long> costs, Map<Key, Long> cache) {
@@ -87,7 +107,6 @@ public class Main {
             costs.add(currentCost);
             return currentCost;
         }
-
         long minCost = costs.peek();
         boolean moved = false;
         for (int roomId = 0; roomId < rooms.size(); roomId++) {
@@ -119,11 +138,8 @@ public class Main {
                             if (moveCost < minCost) {
                                 minCost = moveCost;
                             }
-
                             moveOut(roomId, hallwayPos, hallway, rooms);
-
                             moved = true;
-                            //printBoard(hallway, rooms);
                         }
                     }
                 }
@@ -142,11 +158,12 @@ public class Main {
 
     }
 
-    private static void printBoard(char[] hallway, List<char[]> rooms) {
-        System.out.println(String.valueOf(hallway));
-        for (int i = 0; i < 2; i++) {
+    private static void printBoard(int[] hallway, List<int[]> rooms) {
+        String hall = Arrays.stream(hallway).mapToObj(c -> Character.toString(c)).collect(Collectors.joining());
+        System.out.println(hall);
+        for (int i = 0; i < rooms.get(0).length; i++) {
             System.out.print("##");
-            for (char[] room : rooms) {
+            for (int[] room : rooms) {
                 System.out.print(room[i] + "#");
             }
             System.out.println("#");
@@ -155,42 +172,28 @@ public class Main {
     }
 
     private static boolean allSet(List<int[]> rooms) {
-        return rooms.get(0)[0] == 'A' && rooms.get(0)[1] == 'A'
-                && rooms.get(1)[0] == 'B' && rooms.get(1)[1] == 'B'
-                && rooms.get(2)[0] == 'C' && rooms.get(2)[1] == 'C'
-                && rooms.get(3)[0] == 'D' && rooms.get(3)[1] == 'D';
+        return Arrays.stream(rooms.get(0)).allMatch(c -> c == 'A')
+                && Arrays.stream(rooms.get(1)).allMatch(c -> c == 'B')
+                && Arrays.stream(rooms.get(2)).allMatch(c -> c == 'C')
+                && Arrays.stream(rooms.get(3)).allMatch(c -> c == 'D');
     }
 
     private static boolean canMoveOut(int roomId, int hallwaypos, int[] hallway, List<int[]> rooms) {
-        int[] room = rooms.get(roomId);
-        if (room[0] == '.' && room[1] == '.') {
-            return false;
-        }
         if (hallway[hallwaypos] != '.') {
             return false;
         }
         int roomExit = roomExits.get(roomId);
         if (hallwaypos == roomExit) return false;
 
-        if (isTargetRoom(roomId, rooms.get(roomId))) {
+        int roomLetter = roomLetters.get(roomId);
+        int[] room = rooms.get(roomId);
+        if (isRoomEmptyOrSettled(room, roomLetter)) {
             return false;
         }
-
         int begin = roomExit < hallwaypos ? roomExit : hallwaypos;
         int end = roomExit > hallwaypos ? roomExit : hallwaypos;
 
-        return IntStream.rangeClosed(begin, end)
-                .allMatch(i -> hallway[i] == '.');
-    }
-
-    private static boolean isTargetRoom(int roomId, int[] room) {
-        int letter = room[0] == '.' ? room[1] : room[0];
-        int target = targetRoom.get((char) letter);
-
-        if (roomId == target) {
-            return room[1] == letter && (room[0] == '.' || room[0] == letter);
-        }
-        return false;
+        return isHallwayEmpty(hallway, begin, end);
     }
 
     private static boolean canMoveIn(int roomId, int hallwaypos, int[] hallway, List<int[]> rooms) {
@@ -202,7 +205,7 @@ public class Main {
             return false;
         }
         int[] room = rooms.get(roomId);
-        if (!isRoomEmpty(room, letter)) {
+        if (!isRoomEmptyOrSettled(room, letter)) {
             return false;
         }
         int roomExit = roomExits.get(roomId);
@@ -210,30 +213,17 @@ public class Main {
         int begin = roomExit < hallwaypos ? roomExit : hallwaypos + 1;
         int end = roomExit > hallwaypos ? roomExit : hallwaypos - 1;
 
-        return IntStream.rangeClosed(begin, end)
-                .allMatch(i -> hallway[i] == '.');
-    }
-
-    private static boolean isRoomEmpty(int[] room, int letter) {
-        if (room[1] != '.' && room[1] != letter) {
-            return false;
-        } else return room[0] == '.';
+        return isHallwayEmpty(hallway, begin, end);
     }
 
     private static int moveOut(int roomId, int hallwaypos, int[] hallway, List<int[]> rooms) {
         int[] room = rooms.get(roomId);
-        int moves = 0;
 
-        int toMove;
-        if (room[0] == '.') {
-            toMove = room[1];
-            room[1] = '.';
-            moves++;
-        } else {
-            toMove = room[0];
-            room[0] = '.';
-        }
-        moves++;
+        int roomPos = findFirstLetterInRoom(room);
+        int toMove = room[roomPos];
+        int moves = roomPos + 1;
+        room[roomPos] = '.';
+
         int roomExit = roomExits.get(roomId);
         hallway[hallwaypos] = toMove;
         moves += Math.abs(hallwaypos - roomExit);
@@ -251,25 +241,46 @@ public class Main {
         moves += Math.abs(hallwaypos - roomExit);
         hallway[hallwaypos] = '.';
 
-        if (room[1] == '.') {
-            room[1] = toMove;
-            moves += 2;
-        } else {
-            room[0] = toMove;
-            moves++;
-        }
+        int roomPos = findFirstLetterInRoom(room) - 1;
+        room[roomPos] = toMove;
+        moves += roomPos + 1;
+
         int stepCost = energyCost.get((char) toMove);
         return stepCost * moves;
     }
 
-    private static List<String> readInput() throws IOException {
-        List<String> lines = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            lines = reader.lines().collect(Collectors.toList());
+    private static boolean isHallwayEmpty(int[] hallway, int begin, int end) {
+        boolean hallwayEmpty = true;
+        for (int i = begin; i <= end; i++) {
+            if (hallway[i] != '.') {
+                hallwayEmpty = false;
+                break;
+            }
         }
-        return lines;
+        return hallwayEmpty;
     }
 
+    private static boolean isRoomEmptyOrSettled(int[] room, int roomLetter) {
+        boolean roomEmpty = true;
+        for (int letter : room) {
+            if (letter != '.' && letter != roomLetter) {
+                roomEmpty = false;
+                break;
+            }
+        }
+        return roomEmpty;
+    }
+
+    private static int findFirstLetterInRoom(int[] room) {
+        int roomPos = room.length;
+        for (int i = 0; i < room.length; i++) {
+            if (room[i] != '.') {
+                roomPos = i;
+                break;
+            }
+        }
+        return roomPos;
+    }
 }
 
 class Key {
