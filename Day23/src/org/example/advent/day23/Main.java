@@ -1,6 +1,8 @@
 package org.example.advent.day23;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -41,33 +43,40 @@ public class Main {
     );
 
     public static void main(String[] args) throws IOException {
+        List<String> lines = readInput();
+
         int[] hallway = new int[11];
-        IntStream.range(0, hallway.length).forEach(i -> hallway[i] = '.');
+        Arrays.fill(hallway, '.');
 
-        //hardcoded input :(
+        String line1 = lines.get(2).replace("#", "").trim();
+        String line2 = lines.get(3).replace("#", "").trim();
+
         List<int[]> roomsPart1 = new ArrayList<>();
-        int[] room1 = new int[]{'B', 'D'};
-        roomsPart1.add(room1);
-        int[] room2 = new int[]{'B', 'C'};
-        roomsPart1.add(room2);
-        int[] room3 = new int[]{'D', 'A'};
-        roomsPart1.add(room3);
-        int[] room4 = new int[]{'A', 'C'};
-        roomsPart1.add(room4);
+        IntStream.range(0, 4)
+                .forEach(roomId -> roomsPart1.add(new int[2]));
+        IntStream.range(0, 4)
+                .forEach(roomId -> roomsPart1.get(roomId)[0] = line1.charAt(roomId));
+        IntStream.range(0, 4)
+                .forEach(roomId -> roomsPart1.get(roomId)[1] = line2.charAt(roomId));
 
+        List<String> part2RoomSupplements = List.of(
+                "DD", "CB", "BA", "AC"
+        );
         List<int[]> roomsPart2 = new ArrayList<>();
-        room1 = new int[]{'B', 'D', 'D', 'D'};
-        roomsPart2.add(room1);
-        room2 = new int[]{'B', 'C', 'B', 'C'};
-        roomsPart2.add(room2);
-        room3 = new int[]{'D', 'B', 'A', 'A'};
-        roomsPart2.add(room3);
-        room4 = new int[]{'A', 'A', 'C', 'C'};
-        roomsPart2.add(room4);
-
+        for (int i = 0; i < roomsPart1.size(); i++) {
+            String supplement = part2RoomSupplements.get(i);
+            int[] room = roomsPart1.get(i);
+            int[] newRoom = new int[4];
+            newRoom[0] = room[0];
+            newRoom[3] = room[1];
+            newRoom[1] = supplement.charAt(0);
+            newRoom[2] = supplement.charAt(1);
+            roomsPart2.add(newRoom);
+        }
+        //System.out.println(roomsPart1.stream().map(Main::arrayToString).collect(Collectors.joining(", ")));
+        //System.out.println(roomsPart2.stream().map(Main::arrayToString).collect(Collectors.joining(", ")));
 
         Instant beginTime = Instant.now();
-
         PriorityQueue<Long> costs = new PriorityQueue<>();
         costs.add(Long.MAX_VALUE);
         long minCost = trySolve(hallway, roomsPart1, 0L, costs, new HashMap<>());
@@ -80,8 +89,8 @@ public class Main {
         System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         cacheHit = 0L;
         Arrays.fill(hallway, '.');
-        beginTime = Instant.now();
 
+        beginTime = Instant.now();
         costs = new PriorityQueue<>();
         costs.add(Long.MAX_VALUE);
         long minCostPart2 = trySolve(hallway, roomsPart2, 0L, costs, new HashMap<>());
@@ -157,6 +166,12 @@ public class Main {
             return Long.MAX_VALUE;
         }
 
+    }
+
+    private static String arrayToString(int[] array) {
+        return Arrays.stream(array)
+                .mapToObj(c -> Character.toString((char) c))
+                .collect(Collectors.joining(","));
     }
 
     private static void printBoard(int[] hallway, List<int[]> rooms) {
@@ -281,6 +296,14 @@ public class Main {
             }
         }
         return roomPos;
+    }
+
+    private static List<String> readInput() throws IOException {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            lines = reader.lines().collect(Collectors.toList());
+        }
+        return lines;
     }
 }
 
