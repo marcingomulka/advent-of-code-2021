@@ -11,25 +11,25 @@ import java.util.stream.IntStream;
 
 public class Main {
 
-    public static long cacheHit = 0L;
+    private static long cacheHit = 0L;
 
-    static Map<Character, Integer> energyCost = Map.of(
+    private static Map<Character, Integer> energyCost = Map.of(
             'A', 1,
             'B', 10,
             'C', 100,
             'D', 1000
     );
 
-    static List<Integer> roomPossibleMoves = List.of(0, 1, 3, 5, 7, 9, 10);
+    private static List<Integer> roomPossibleMoves = List.of(0, 1, 3, 5, 7, 9, 10);
 
-    static Map<Integer, Integer> roomExits = Map.of(
+    private static Map<Integer, Integer> roomExits = Map.of(
             0, 2,
             1, 4,
             2, 6,
             3, 8
     );
 
-    static Map<Character, Integer> targetRoom = Map.of(
+    private static Map<Character, Integer> targetRoom = Map.of(
             'A', 0,
             'B', 1,
             'C', 2,
@@ -37,27 +37,27 @@ public class Main {
     );
 
     public static void main(String[] args) throws IOException {
-        char[] hallway = new char[11];
+        int[] hallway = new int[11];
         IntStream.range(0, hallway.length).forEach(i -> hallway[i] = '.');
 
-        List<char[]> roomsPart1 = new ArrayList<>();
-        char[] room1 = new char[]{'B', 'D'};
+        List<int[]> roomsPart1 = new ArrayList<>();
+        int[] room1 = new int[]{'B', 'D'};
         roomsPart1.add(room1);
-        char[] room2 = new char[]{'B', 'C'};
+        int[] room2 = new int[]{'B', 'C'};
         roomsPart1.add(room2);
-        char[] room3 = new char[]{'D', 'A'};
+        int[] room3 = new int[]{'D', 'A'};
         roomsPart1.add(room3);
-        char[] room4 = new char[]{'A', 'C'};
+        int[] room4 = new int[]{'A', 'C'};
         roomsPart1.add(room4);
 
-        List<char[]> roomsPart2 = new ArrayList<>();
-        room1 = new char[]{'B', 'D', 'D', 'D'};
+        List<int[]> roomsPart2 = new ArrayList<>();
+        room1 = new int[]{'B', 'D', 'D', 'D'};
         roomsPart2.add(room1);
-        room2 = new char[]{'B', 'C', 'B', 'C'};
+        room2 = new int[]{'B', 'C', 'B', 'C'};
         roomsPart2.add(room2);
-        room3 = new char[]{'D', 'B', 'A', 'A'};
+        room3 = new int[]{'D', 'B', 'A', 'A'};
         roomsPart2.add(room3);
-        room4 = new char[]{'A', 'C'};
+        room4 = new int[]{'A', 'A', 'C', 'C'};
         roomsPart2.add(room4);
 
 
@@ -73,7 +73,7 @@ public class Main {
         System.out.println("Time: " + Duration.between(beginTime, Instant.now()).toSeconds() + " s");
     }
 
-    private static long trySolve(char[] hallway, List<char[]> rooms, long currentCost, PriorityQueue<Long> costs, Map<Key, Long> cache) {
+    private static long trySolve(int[] hallway, List<int[]> rooms, long currentCost, PriorityQueue<Long> costs, Map<Key, Long> cache) {
         Key key = new Key(hallway, rooms);
         Long cached = cache.get(key);
         if (cached != null) {
@@ -154,15 +154,15 @@ public class Main {
         System.out.println("----------------------");
     }
 
-    private static boolean allSet(List<char[]> rooms) {
+    private static boolean allSet(List<int[]> rooms) {
         return rooms.get(0)[0] == 'A' && rooms.get(0)[1] == 'A'
                 && rooms.get(1)[0] == 'B' && rooms.get(1)[1] == 'B'
                 && rooms.get(2)[0] == 'C' && rooms.get(2)[1] == 'C'
                 && rooms.get(3)[0] == 'D' && rooms.get(3)[1] == 'D';
     }
 
-    private static boolean canMoveOut(int roomId, int hallwaypos, char[] hallway, List<char[]> rooms) {
-        char[] room = rooms.get(roomId);
+    private static boolean canMoveOut(int roomId, int hallwaypos, int[] hallway, List<int[]> rooms) {
+        int[] room = rooms.get(roomId);
         if (room[0] == '.' && room[1] == '.') {
             return false;
         }
@@ -183,9 +183,9 @@ public class Main {
                 .allMatch(i -> hallway[i] == '.');
     }
 
-    private static boolean isTargetRoom(int roomId, char[] room) {
-        char letter = room[0] == '.' ? room[1] : room[0];
-        int target = targetRoom.get(letter);
+    private static boolean isTargetRoom(int roomId, int[] room) {
+        int letter = room[0] == '.' ? room[1] : room[0];
+        int target = targetRoom.get((char) letter);
 
         if (roomId == target) {
             return room[1] == letter && (room[0] == '.' || room[0] == letter);
@@ -193,15 +193,15 @@ public class Main {
         return false;
     }
 
-    private static boolean canMoveIn(int roomId, int hallwaypos, char[] hallway, List<char[]> rooms) {
+    private static boolean canMoveIn(int roomId, int hallwaypos, int[] hallway, List<int[]> rooms) {
         if (hallway[hallwaypos] == '.') {
             return false;
         }
-        char letter = hallway[hallwaypos];
-        if (targetRoom.get(letter) != roomId) {
+        int letter = hallway[hallwaypos];
+        if (targetRoom.get((char) letter) != roomId) {
             return false;
         }
-        char[] room = rooms.get(roomId);
+        int[] room = rooms.get(roomId);
         if (!isRoomEmpty(room, letter)) {
             return false;
         }
@@ -214,17 +214,17 @@ public class Main {
                 .allMatch(i -> hallway[i] == '.');
     }
 
-    private static boolean isRoomEmpty(char[] room, char letter) {
+    private static boolean isRoomEmpty(int[] room, int letter) {
         if (room[1] != '.' && room[1] != letter) {
             return false;
         } else return room[0] == '.';
     }
 
-    private static int moveOut(int roomId, int hallwaypos, char[] hallway, List<char[]> rooms) {
-        char[] room = rooms.get(roomId);
+    private static int moveOut(int roomId, int hallwaypos, int[] hallway, List<int[]> rooms) {
+        int[] room = rooms.get(roomId);
         int moves = 0;
 
-        char toMove;
+        int toMove;
         if (room[0] == '.') {
             toMove = room[1];
             room[1] = '.';
@@ -238,15 +238,15 @@ public class Main {
         hallway[hallwaypos] = toMove;
         moves += Math.abs(hallwaypos - roomExit);
 
-        int stepCost = energyCost.get(toMove);
+        int stepCost = energyCost.get((char) toMove);
         return stepCost * moves;
     }
 
-    private static int moveIn(int roomId, int hallwaypos, char[] hallway, List<char[]> rooms) {
-        char[] room = rooms.get(roomId);
+    private static int moveIn(int roomId, int hallwaypos, int[] hallway, List<int[]> rooms) {
+        int[] room = rooms.get(roomId);
         int moves = 0;
 
-        char toMove = hallway[hallwaypos];
+        int toMove = hallway[hallwaypos];
         int roomExit = roomExits.get(roomId);
         moves += Math.abs(hallwaypos - roomExit);
         hallway[hallwaypos] = '.';
@@ -258,7 +258,7 @@ public class Main {
             room[0] = toMove;
             moves++;
         }
-        int stepCost = energyCost.get(toMove);
+        int stepCost = energyCost.get((char) toMove);
         return stepCost * moves;
     }
 
@@ -274,75 +274,40 @@ public class Main {
 
 class Key {
 
-    private final String hallway;
-    private final String room0;
-    private final String room1;
-    private final String room2;
-    private final String room3;
+    private final int[] hallway;
+    private final int[] room0;
+    private final int[] room1;
+    private final int[] room2;
+    private final int[] room3;
 
 
-    public Key(char[] hallway, List<char[]> rooms) {
-        this.hallway = String.valueOf(hallway);
-        this.room0 = String.valueOf(rooms.get(0));
-        this.room1 = String.valueOf(rooms.get(1));
-        this.room2 = String.valueOf(rooms.get(2));
-        this.room3 = String.valueOf(rooms.get(3));
+    Key(int[] hallway, List<int[]> rooms) {
+        this.hallway = Arrays.copyOf(hallway, hallway.length);
+        this.room0 = Arrays.copyOf(rooms.get(0), rooms.get(0).length);
+        this.room1 = Arrays.copyOf(rooms.get(1), rooms.get(1).length);
+        this.room2 = Arrays.copyOf(rooms.get(2), rooms.get(2).length);
+        this.room3 = Arrays.copyOf(rooms.get(3), rooms.get(3).length);
     }
-
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Key key = (Key) o;
-        return hallway.equals(key.hallway) &&
-                room0.equals(key.room0) &&
-                room1.equals(key.room1) &&
-                room2.equals(key.room2) &&
-                room3.equals(key.room3);
+        return Arrays.equals(hallway, key.hallway) &&
+                Arrays.equals(room0, key.room0) &&
+                Arrays.equals(room1, key.room1) &&
+                Arrays.equals(room2, key.room2) &&
+                Arrays.equals(room3, key.room3);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(hallway, room0, room1, room2, room3);
-    }
-}
-
-class Pair<X, Y> {
-    X first;
-    Y second;
-
-    public Pair(X first, Y second) {
-        this.first = first;
-        this.second = second;
-    }
-
-    public X getFirst() {
-        return first;
-    }
-
-    public Y getSecond() {
-        return second;
-    }
-
-    @Override
-    public String toString() {
-        return "{" + first +
-                ", " + second +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Pair<?, ?> pair = (Pair<?, ?>) o;
-        return Objects.equals(first, pair.first) &&
-                Objects.equals(second, pair.second);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(first, second);
+        int result = Arrays.hashCode(hallway);
+        result = 31 * result + Arrays.hashCode(room0);
+        result = 31 * result + Arrays.hashCode(room1);
+        result = 31 * result + Arrays.hashCode(room2);
+        result = 31 * result + Arrays.hashCode(room3);
+        return result;
     }
 }
