@@ -137,9 +137,6 @@ public class Main {
             }
         }
         if (moved) {
-            if (minCost < costs.peek()) {
-                costs.add(minCost);
-            }
             return minCost;
         } else {
             return Long.MAX_VALUE;
