@@ -44,6 +44,7 @@ public class Main {
         int[] hallway = new int[11];
         IntStream.range(0, hallway.length).forEach(i -> hallway[i] = '.');
 
+        //hardcoded input :(
         List<int[]> roomsPart1 = new ArrayList<>();
         int[] room1 = new int[]{'B', 'D'};
         roomsPart1.add(room1);
